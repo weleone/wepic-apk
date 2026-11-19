@@ -1455,7 +1455,7 @@
     var W = Math.max(2, Math.round(first.w * scale));
     var H = Math.max(2, Math.round(first.h * scale));
     toast("正在生成 GIF 动图…");
-    var gif = new GIF({ workers: 2, quality: 10, width: W, height: H, workerScript: "gif.worker.js", repeat: 0 });
+    var gif = new GIF({ workers: 0, quality: 10, width: W, height: H, workerScript: "gif.worker.js", repeat: 0 });
     state.items.forEach(function(item){
       var canvas = document.createElement("canvas");
       canvas.width = W; canvas.height = H;
