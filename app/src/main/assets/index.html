@@ -222,7 +222,7 @@
   .mode-seg button{flex:1;border:none;background:transparent;border-radius:8px;padding:8px 10px;font-size:14px;font-weight:500}
   .mode-seg button[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.14);font-weight:700}
 
-  /* ---------- 分图模式选择器 ---------- */
+  /* ---------- 切图模式选择器 ---------- */
   .split-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .split-mode{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px 6px 8px;cursor:pointer;text-align:center}
   .split-mode:hover{border-color:var(--ink)}
@@ -237,14 +237,14 @@
   .split-src-thumb img{width:100%;height:100%;object-fit:cover;display:block}
   .split-src-thumb.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 
-  /* ---------- 分图预览 ---------- */
+  /* ---------- 切图预览 ---------- */
   .split-preview{width:100%;max-width:880px;box-shadow:var(--shadow);position:relative;border-radius:6px;overflow:hidden;align-self:flex-start}
   .split-preview img{width:100%;display:block}
   .split-overlay{position:absolute;inset:0;display:grid}
   .split-overlay .cell{border:1.5px solid rgba(255,255,255,.9);box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);position:relative}
   .split-overlay .cell b{position:absolute;top:6px;left:6px;min-width:22px;height:22px;padding:0 6px;background:rgba(15,13,10,.72);color:#fff;border-radius:999px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
 
-  /* ---------- 分图拖动手柄 ---------- */
+  /* ---------- 切图拖动手柄 ---------- */
   .split-handle{position:absolute;z-index:6;touch-action:none}
   .split-handle.v{top:0;bottom:0;width:24px;margin-left:-12px;cursor:ew-resize}
   .split-handle.h{left:0;right:0;height:24px;margin-top:-12px;cursor:ns-resize}
@@ -279,9 +279,9 @@
       <h2>模式</h2>
       <div class="mode-seg" id="modeSeg" role="group" aria-label="模式">
         <button type="button" data-mode="collage" aria-pressed="true">拼图</button>
-        <button type="button" data-mode="split" aria-pressed="false">分图</button>
+        <button type="button" data-mode="split" aria-pressed="false">切图</button>
       </div>
-      <p class="hint">拼图：多张图拼成一张；分图：一张图按示例切成多张。</p>
+      <p class="hint">拼图：多张图拼成一张；切图：一张图按示例切成多张。</p>
     </section>
 
     <section class="group">
@@ -1107,14 +1107,14 @@
       el.textContent = "成品 " + g.W + " × " + g.H + " px。";
   }
 
-  /* ---------------- 分图 ---------------- */
+  /* ---------------- 切图 ---------------- */
   function splitModeDef(){
     for (var i = 0; i < SPLIT_MODES.length; i++)
       if (SPLIT_MODES[i].id === state.splitMode) return SPLIT_MODES[i];
     return SPLIT_MODES[0];
   }
 
-  /* 分图用的原图：选中的那张，没有选中就取第一张 */
+  /* 切图用的原图：选中的那张，没有选中就取第一张 */
   function splitSource(){
     var i = selectedIndex();
     if (i >= 0) return state.items[i];
@@ -1354,7 +1354,7 @@
   });
 
   function updateExportBtn(){
-    var label = state.mode === "split" ? "导出分图" : "导出拼图";
+    var label = state.mode === "split" ? "导出切图" : "导出拼图";
     $("btnExport").textContent = label;
     $("btnExportTopLabel").textContent = label;
   }
@@ -1411,20 +1411,20 @@
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
   }
 
-  /* 分图导出：按拖出来的比例切，逐块按顺序编号下载 */
+  /* 切图导出：按拖出来的比例切，逐块按顺序编号下载 */
   function exportSplit(){
     var src = splitSource();
-    if (!src){ toast("先添加一张图片再分图"); return; }
+    if (!src){ toast("先添加一张图片再切图"); return; }
     var m = splitModeDef();
     var fmt = state.expFmt === "gif" ? "png" : state.expFmt;
     var mime = fmt === "png" ? "image/png" : (fmt === "webp" ? "image/webp" : "image/jpeg");
     var ext = fmt === "jpeg" ? "jpg" : fmt;
-    var base = (src.name || "分图").replace(/\.[^.]*$/, "");
+    var base = (src.name || "切图").replace(/\.[^.]*$/, "");
     var W = src.w, H = src.h, total = m.cols * m.rows, idx = 0;
     var cumC = splitCum(splitPos("col")), cumR = splitCum(splitPos("row"));
-    toast("正在导出 " + total + " 张分图…");
+    toast("正在导出 " + total + " 张切图…");
     function next(){
-      if (idx >= total){ toast("分图已导出，共 " + total + " 张"); return; }
+      if (idx >= total){ toast("切图已导出，共 " + total + " 张"); return; }
       var r = Math.floor(idx / m.cols), c = idx % m.cols;
       var x0 = Math.round(cumC[c] * W), x1 = Math.round(cumC[c + 1] * W);
       var y0 = Math.round(cumR[r] * H), y1 = Math.round(cumR[r + 1] * H);

@@ -12,9 +12,18 @@ android {
         versionName "1.0.0"
     }
 
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("WEPIC_KEYSTORE_PATH") ?: "wepic-release.jks")
+            storePassword System.getenv("WEPIC_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("WEPIC_KEY_ALIAS") ?: "wepic"
+            keyPassword System.getenv("WEPIC_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
-            // 首版先不签名：编 unsigned release 验通再说，正式签名见 README
+            signingConfig signingConfigs.release
             minifyEnabled false
         }
         debug {

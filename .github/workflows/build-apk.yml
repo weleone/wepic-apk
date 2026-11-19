@@ -18,7 +18,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.WEPIC_KEYSTORE_BASE64 }}" | base64 -d > wepic-release.jks
+
       - name: Build release APK
+        env:
+          WEPIC_KEYSTORE_PATH: ${{ github.workspace }}/wepic-release.jks
+          WEPIC_KEYSTORE_PASSWORD: ${{ secrets.WEPIC_KEYSTORE_PASSWORD }}
+          WEPIC_KEY_ALIAS: ${{ secrets.WEPIC_KEY_ALIAS }}
+          WEPIC_KEY_PASSWORD: ${{ secrets.WEPIC_KEY_PASSWORD }}
         run: |
           chmod +x gradlew || true
           ./gradlew :app:assembleRelease --no-daemon || gradle :app:assembleRelease --no-daemon
