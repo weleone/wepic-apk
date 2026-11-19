@@ -964,6 +964,10 @@
     state.expFmt = v;
     $("qualityRow").style.display = (v === "jpeg" || v === "webp") ? "flex" : "none";
     $("gifDelayRow").style.display = v === "gif" ? "flex" : "none";
+    // GIF 不用尺寸基准和总宽度，藏起来免得误导
+    $("expModeRow").style.display = v === "gif" ? "none" : "";
+    $("expWidthRow").style.display = (v === "gif" || state.expMode !== "fixed") ? "none" : "";
+    updateExpInfo();
   });
   bindSeg("expModeSeg", "mode", function(v){
     state.expMode = v;
@@ -1092,6 +1096,15 @@
   function updateExpInfo(){
     var el = $("expSizeInfo");
     if (!el) return;
+    if (state.expFmt === "gif" && state.mode !== "split"){
+      var first = state.items[0];
+      if (!first){ el.textContent = ""; return; }
+      var scale = Math.min(1, 800 / Math.max(first.w, first.h));
+      var gw = Math.max(2, Math.round(first.w * scale));
+      var gh = Math.max(2, Math.round(first.h * scale));
+      el.textContent = "GIF 每帧 " + gw + " × " + gh + " px（长边最多 800px）。";
+      return;
+    }
     if (state.mode === "split"){
       var src = splitSource(), m = splitModeDef();
       if (!src){ el.textContent = ""; return; }
