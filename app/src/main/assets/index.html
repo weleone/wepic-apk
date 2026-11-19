@@ -1446,6 +1446,7 @@
   function exportGif(){
     var n = state.items.length;
     if (!n){ toast("先添加图片再导出"); return; }
+    if (typeof GIF === "undefined"){ toast("GIF 库没加载上，重启 App 再试"); return; }
     var delaySec = parseFloat($("gifDelay").value);
     if (!(delaySec > 0)) delaySec = 0.5;
     delaySec = Math.max(0.1, Math.min(10, delaySec));
@@ -1455,23 +1456,33 @@
     var W = Math.max(2, Math.round(first.w * scale));
     var H = Math.max(2, Math.round(first.h * scale));
     toast("正在生成 GIF 动图…");
-    var gif = new GIF({ workers: 0, quality: 10, width: W, height: H, workerScript: "gif.worker.js", repeat: 0 });
-    state.items.forEach(function(item){
-      var canvas = document.createElement("canvas");
-      canvas.width = W; canvas.height = H;
-      var ctx = canvas.getContext("2d");
-      ctx.fillStyle = state.bg;
-      ctx.fillRect(0, 0, W, H);
-      drawCover(ctx, item.img, 0, 0, W, H);
-      gif.addFrame(ctx, { copy: true, delay: delayMs });
-    });
-    gif.on("finished", function(blob){
-      var d = new Date();
-      function p(v){ return (v < 10 ? "0" : "") + v; }
-      downloadBlob(blob, "拼图动图-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes()) + ".gif");
-      toast("GIF 动图已导出（" + W + " × " + H + " px，每帧 " + delaySec + " 秒）");
-    });
-    gif.render();
+    try {
+      var gif = new GIF({ workers: 0, quality: 10, width: W, height: H, workerScript: "gif.worker.js", repeat: 0 });
+      state.items.forEach(function(item){
+        var canvas = document.createElement("canvas");
+        canvas.width = W; canvas.height = H;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = state.bg;
+        ctx.fillRect(0, 0, W, H);
+        drawCover(ctx, item.img, 0, 0, W, H);
+        gif.addFrame(ctx, { copy: true, delay: delayMs });
+      });
+      gif.on("finished", function(blob){
+        var d = new Date();
+        function p(v){ return (v < 10 ? "0" : "") + v; }
+        downloadBlob(blob, "拼图动图-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + p(d.getHours()) + p(d.getMinutes()) + ".gif");
+        toast("GIF 动图已导出（" + W + " × " + H + " px，每帧 " + delaySec + " 秒）");
+      });
+      gif.on("error", function(err){
+        toast("GIF 生成失败：" + (err && err.message ? err.message : err));
+      });
+      gif.on("progress", function(p){
+        if (p > 0 && p < 1) toast("正在生成 GIF 动图 " + Math.round(p * 100) + "%…");
+      });
+      gif.render();
+    } catch (e) {
+      toast("GIF 生成出错：" + (e && e.message ? e.message : e));
+    }
   }
 
   function exportCollage(){
